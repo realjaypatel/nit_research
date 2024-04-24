@@ -20,7 +20,7 @@ def receive_message():
 while True:
     received_data = receive_message()
     if received_data == "time":
-        current_time = str(time.time())
+        current_time = str(time.ctime())
         send_message(current_time)
 
 # Close the connection
