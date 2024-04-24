@@ -1,6 +1,7 @@
 from asyncio import wait
 import socket
 import threading
+import random
 
 clients_list = []
 
@@ -24,12 +25,20 @@ def server_connection_loop(server_socket):
 
 # Function to send a message to a client
 def send_message(client_socket, message):
-    client_socket.send(message.encode())
+    try:
+        client_socket.send(message.encode())
+    except BrokenPipeError:
+        print("Broken pipe error. Closing the connection.")
+        client_socket.close()
 
 # Function to receive a message from a client
 def receive_message(client_socket):
-    data = client_socket.recv(1024)
-    return data.decode()
+    try:
+        data = client_socket.recv(1024)
+        return data.decode()
+    except ConnectionResetError:
+        print("Connection reset by peer. Closing the connection.")
+        client_socket.close()
 
 def handle_client(client_socket,addr):
     received_data = receive_message(client_socket)
@@ -41,7 +50,13 @@ if __name__ == "__main__":
     while not clients_list:
         continue
     
-    for client in clients_list:
-        client_thread = threading.Thread(target=handle_client, args=(client[0], client[1]))
-        client_thread.start()
+
+    while True:
+        selected_clients = random.sample(clients_list, k=len(clients_list)*2//3)
+        for client in selected_clients:
+            if client[0]._closed:
+                clients_list.remove(client)
+                continue
+            else:
+                send_message(client[0],"time")
 

@@ -1,4 +1,5 @@
 import socket
+import time
 
 # Connect to the server
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -15,12 +16,12 @@ def receive_message():
     data = client_socket.recv(1024)
     return data.decode()
 
-# Example of sending a message
-send_message("Hello from the client")
-
-# Example of receiving a message
-received_data = receive_message()
-print("Received from server:", received_data)
+# Loop to send real-time timestamp when the server asks for the time
+while True:
+    received_data = receive_message()
+    if received_data == "time":
+        current_time = str(time.time())
+        send_message(current_time)
 
 # Close the connection
 client_socket.close()
