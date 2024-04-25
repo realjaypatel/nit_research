@@ -49,11 +49,6 @@ def broadcast_message(message,sender):
         else:
             send_message(client[0], message)
 
-def handle_client(client_socket,addr):
-    received_data = receive_message(client_socket)
-    print(f"Received from {addr}: {received_data}")
-    send_message(client_socket,"Welcome to the server")
-
 def clean_clients_list():
     while True:
         for client in clients_list:
