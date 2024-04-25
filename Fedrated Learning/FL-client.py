@@ -29,6 +29,7 @@ def report_new_key(key):
     while True:
         message = receive_message()
         if message == "send_key":
+            send_message(key)
             break
 
 # Loop to send real-time timestamp when the server asks for the time
