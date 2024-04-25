@@ -5,7 +5,8 @@ import threading
 import random
 
 clients_list = []
-
+global_key_list = []
+k=len(clients_list)*2//3
 # Function to start the server
 def start_server():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -40,6 +41,13 @@ def receive_message(client_socket):
     except (ConnectionResetError, OSError):
         print("Error receiving message. Closing the connection.")
         client_socket.close()
+    
+def broadcast_message(message,sender):
+    for client in clients_list:
+        if client is sender:
+            pass
+        else:
+            send_message(client[0], message)
 
 def handle_client(client_socket,addr):
     received_data = receive_message(client_socket)
@@ -51,21 +59,25 @@ def clean_clients_list():
         for client in clients_list:
             if client[0]._closed:
                 clients_list.remove(client)
+                k=len(clients_list)*2//3
         time.sleep(1)  # Check every 5 seconds
 
+def ask_for_model(k):
+    while True:
+        print(f"Current time at server is: {time.ctime()}")
+        selected_clients = random.sample(clients_list, k)
+        for client in selected_clients:
+            send_message(client[0],"model")
+            received_time = receive_message(client[0])
+            print(f"Received time from client {client[1]}: {received_time}")
+        
+        time.sleep(10)
+            
+        
 if __name__ == "__main__":
     socket = start_server()
     while not clients_list:
         continue
     cleaner_thread = threading.Thread(target=clean_clients_list)
     cleaner_thread.start()
-    
-    while True:
-        print(f"Current time at server is: {time.ctime()}")
-        selected_clients = random.sample(clients_list, k=len(clients_list)*2//3)
-        for client in selected_clients:
-            send_message(client[0],"model")
-            received_time = receive_message(client[0])
-            print(f"Received time from client {client[1]}: {received_time}")
-        time.sleep(5)  # Run this loop every 5 seconds
 

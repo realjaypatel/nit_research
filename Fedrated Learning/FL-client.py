@@ -9,12 +9,20 @@ client_socket.connect((host, port))
 
 # Function to send a message to the server
 def send_message(message):
-    client_socket.send(message.encode())
+    try:
+        client_socket.send(message.encode())
+    except (BrokenPipeError, OSError):
+        print("Error sending message. Closing the connection.")
+        client_socket.close()
 
 # Function to receive a message from the server
 def receive_message():
-    data = client_socket.recv(1024)
-    return data.decode()
+    try:
+        data = client_socket.recv(1024)
+        return data.decode()
+    except (ConnectionResetError, OSError):
+        print("Error receiving message. Closing the connection.")
+        client_socket.close()
 
 # Loop to send real-time timestamp when the server asks for the time
 while True:
@@ -22,7 +30,7 @@ while True:
     if received_data == "model":   
         send_message()
 
-    if receive_message == "quit":
+    elif receive_message == "quit":
         # Close the connection
         client_socket.close()
         exit()
