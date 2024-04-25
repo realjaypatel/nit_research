@@ -24,6 +24,13 @@ def receive_message():
         print("Error receiving message. Closing the connection.")
         client_socket.close()
 
+def report_new_key(key):
+    send_message("new_key")
+    while True:
+        message = receive_message()
+        if message == "send_key":
+            break
+
 # Loop to send real-time timestamp when the server asks for the time
 while True:
     received_data = receive_message()

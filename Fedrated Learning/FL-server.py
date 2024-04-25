@@ -9,18 +9,8 @@ global_key_list = []
 k=len(clients_list)*2//3
 
 ##################################################################
-# functions for setting up
+# setting up
 ##################################################################
-
-# Function to start the server
-def start_server():
-    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    host = socket.gethostname()
-    port = 64852
-    server_socket.bind((host, port))
-    server_socket.listen(10)  # Listen for up to 10 connections
-    server_connection_thread = threading.Thread(target=server_connection_loop,args=(server_socket,))
-    server_connection_thread.start()
 
 def server_connection_loop(server_socket):
     while True:
@@ -29,6 +19,14 @@ def server_connection_loop(server_socket):
         clients_list.append((client_socket,addr))
         # client_thread = threading.Thread(target=handle_client, args=(client_socket, addr))
         # client_thread.start()
+
+server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+host = socket.gethostname()
+port = 64852
+server_socket.bind((host, port))
+server_socket.listen(10)  # Listen for up to 10 connections
+server_connection_thread = threading.Thread(target=server_connection_loop,args=(server_socket,))
+server_connection_thread.start()
 
 
 ##################################################################
@@ -75,6 +73,12 @@ def clean_clients_list():
 def listen_for_new_keys():
     while True:
         for client in clients_list:
+            message = receive_message(client)
+            if message is "new_key":
+                send_message("send_key")
+                key = receive_message(client)
+                global_key_list.append(key)
+
             
 
 ##################################################################
@@ -96,7 +100,6 @@ def ask_for_model(k):
         
 
 if __name__ == "__main__":
-    socket = start_server()
     while not clients_list:
         continue
     cleaner_thread = threading.Thread(target=clean_clients_list)
