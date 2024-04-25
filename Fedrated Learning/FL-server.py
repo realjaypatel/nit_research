@@ -64,7 +64,7 @@ if __name__ == "__main__":
         print(f"Current time at server is: {time.ctime()}")
         selected_clients = random.sample(clients_list, k=len(clients_list)*2//3)
         for client in selected_clients:
-            send_message(client[0],"time")
+            send_message(client[0],"model")
             received_time = receive_message(client[0])
             print(f"Received time from client {client[1]}: {received_time}")
         time.sleep(5)  # Run this loop every 5 seconds

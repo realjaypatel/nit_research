@@ -19,9 +19,11 @@ def receive_message():
 # Loop to send real-time timestamp when the server asks for the time
 while True:
     received_data = receive_message()
-    if received_data == "time":
-        current_time = str(time.ctime())
-        send_message(current_time)
+    if received_data == "model":   
+        send_message()
 
-# Close the connection
-client_socket.close()
+    if receive_message == "quit":
+        # Close the connection
+        client_socket.close()
+        exit()
+
