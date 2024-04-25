@@ -7,6 +7,11 @@ import random
 clients_list = []
 global_key_list = []
 k=len(clients_list)*2//3
+
+##################################################################
+# functions for setting up
+##################################################################
+
 # Function to start the server
 def start_server():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -24,6 +29,11 @@ def server_connection_loop(server_socket):
         clients_list.append((client_socket,addr))
         # client_thread = threading.Thread(target=handle_client, args=(client_socket, addr))
         # client_thread.start()
+
+
+##################################################################
+# functions for communication send receive and broadcast
+##################################################################
 
 # Function to send a message to a client
 def send_message(client_socket, message):
@@ -49,13 +59,27 @@ def broadcast_message(message,sender):
         else:
             send_message(client[0], message)
 
+
+##################################################################
+# functions used in threads
+##################################################################
+
 def clean_clients_list():
     while True:
         for client in clients_list:
             if client[0]._closed:
                 clients_list.remove(client)
                 k=len(clients_list)*2//3
-        time.sleep(1)  # Check every 5 seconds
+        time.sleep(1)  # Check every 1 seconds
+
+def listen_for_new_keys():
+    while True:
+        for client in clients_list:
+            
+
+##################################################################
+# Functions for working with clients
+##################################################################
 
 def ask_for_model(k):
     while True:
@@ -68,11 +92,12 @@ def ask_for_model(k):
         
         time.sleep(10)
             
+
         
+
 if __name__ == "__main__":
     socket = start_server()
     while not clients_list:
         continue
     cleaner_thread = threading.Thread(target=clean_clients_list)
     cleaner_thread.start()
-
