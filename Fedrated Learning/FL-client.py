@@ -32,14 +32,13 @@ def report_new_key(key):
             send_message(key)
             break
 
-# Loop to send real-time timestamp when the server asks for the time
-while True:
-    received_data = receive_message()
-    if received_data == "model":   
-        send_message()
+def listen_for_server():
+    while True:
+        received_data = receive_message()
+        if received_data == "model":   
+            send_message()
 
-    elif receive_message == "quit":
-        # Close the connection
-        client_socket.close()
-        exit()
-
+        elif receive_message == "quit":
+            # Close the connection
+            client_socket.close()
+            exit()
