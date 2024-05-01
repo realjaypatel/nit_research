@@ -1,6 +1,6 @@
 import socket
 import time
-
+import FeatureEx
 # Connect to the server
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 host = socket.gethostname()
@@ -42,3 +42,10 @@ def listen_for_server():
             # Close the connection
             client_socket.close()
             exit()
+
+def extract_keys(data_path,output_path):
+    extractor = FeatureEx.KeyExtractor(data_path)
+    extractor.process_files()
+    output = extractor.make_binary_input()
+    extractor.make_csv(output,extractor.list_of_keys,output_path)
+
