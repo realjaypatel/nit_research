@@ -1,6 +1,6 @@
 import socket
 import time
-import nit_research.FeatureEx_full as FeatureEx_full
+import FeatureEx as FeatureEx
 import threading
 import os
 
@@ -8,7 +8,7 @@ import os
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 host = socket.gethostname()
 port = 64852
-client_socket.connect((host, port))
+
 
 # Function to send a message to the server
 def send_message(message):
@@ -59,15 +59,23 @@ def bfs_json_files(data_path):
                 yield item_path
 
 def extract_keys(data_path,output_path):
-    extractor = FeatureEx_full.KeyExtractor(data_path)
+    extractor = FeatureEx.KeyExtractor(data_path)
     
     extractor.process_files()
-    output = extractor.make_binary_input()
-    extractor.make_csv(output,extractor.list_of_keys,output_path)
+    while not (receive_message() == "key list request"):
+        pass
+    send_message(extractor.list_of_keys)
+    send_message("global key request")
+    extractor.list_of_keys = list(dict.fromkeys(receive_message().split()))
+    extractor.make_csv(extractor.make_binary_input(),extractor.list_of_keys,output_path)
+    return extractor
+
+def round():
+    
+
 
 
 if __name__ == "__main__":
     client_data_path = ""
-
-    key_extraction_thread = threading.Thread(extract_keys,args=client_data_path,client_data_path+"/output.csv")
-    key_extraction_thread.start()
+    extractor = extract_keys(client_data_path,client_data_path)
+    client_socket.connect((host, port))

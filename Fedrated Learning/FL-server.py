@@ -4,8 +4,9 @@ import socket
 import threading
 import random
 
+client_num = 10
 clients_list = []
-global_key_list = []
+global_key_list = set()
 k=len(clients_list)*2//3
 
 ##################################################################
@@ -13,20 +14,23 @@ k=len(clients_list)*2//3
 ##################################################################
 
 def server_connection_loop(server_socket):
-    while True:
+    while len(clients_list) < client_num:
         client_socket, addr = server_socket.accept()
         print(f'Connected to {addr}')
         clients_list.append((client_socket,addr))
-        # client_thread = threading.Thread(target=handle_client, args=(client_socket, addr))
-        # client_thread.start()
+        send_message(client_socket,"key list request")
+        client_keys=receive_message(client_socket)
+        for i in client_keys:
+            global_key_list.add(i)
+
+    broadcast_message(str(dict.fromkeys(global_key_list)),server_socket)
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 host = socket.gethostname()
 port = 64852
 server_socket.bind((host, port))
-server_socket.listen(10)  # Listen for up to 10 connections
-server_connection_thread = threading.Thread(target=server_connection_loop,args=(server_socket,))
-server_connection_thread.start()
+server_socket.listen(client_num)  # Listen for up to 10 connections
+
 
 
 ##################################################################
@@ -102,5 +106,4 @@ def ask_for_model(k):
 if __name__ == "__main__":
     while not clients_list:
         continue
-    cleaner_thread = threading.Thread(target=clean_clients_list)
-    cleaner_thread.start()
+    server_connection_loop(server_socket)
