@@ -198,7 +198,7 @@ class KeyExtractor:
         lok.insert(1,"pii_exist")
 
         # print(lok)
-        with open(output_path + 'output.csv', 'w',encoding="utf-8") as file:
+        with open(output_path + 'output_batchAll.csv', 'w',encoding="utf-8") as file:
             write = csv.writer(file,escapechar='\\')
             write.writerow(lok)
             write.writerows(binary_out)
@@ -212,10 +212,10 @@ class KeyExtractor:
 # log_path = rootDir + "output/log.txt"
 # out_path = rootDir + "output/"
     
-# rootDir = ""
-# data_Dir = rootDir + "data/antshield_public_dataset/raw_data/auto_anteater"
-# log_path = rootDir + "output/log.txt"
-# out_path = rootDir + "output/"
+rootDir = ""
+data_Dir = rootDir + "data/antshield_public_dataset/raw_data/auto_anteater/"
+log_path = rootDir + "output/log.txt"
+out_path = rootDir + "output/"
 
 # key_extractor = KeyExtractor(data_Dir)
 # key_extractor.process_files()
