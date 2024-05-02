@@ -11,6 +11,12 @@ class KeyExtractor:
         Args:
         - data_path (str): The directory path where the JSON files are located.
         """
+        self.data_path = data_path
+        if os.path.isdir(data_path):
+            self.directory = data_path
+            self.json_files = self.find_json_files(self.directory)
+        else:
+            self.json_files = [data_path]
         self.delimiters = [";", "/", "&", "?",  "(", ")", "{", "}", "[", "]", "\\x", "\\t",'%', '"' , "'",":", "=" ]
         # self.delimiters_2 = [":", "=",";", "/", "&", "?",  "(", ")", "{", "}", "[", "]", "\\x", "\\t",'%', '"' , "'", ]
         self.skip = ['recon' ,'adverti', 'brand' ,'model' ,'Nexus 6','sdk',"\\"]
@@ -135,21 +141,38 @@ class KeyExtractor:
         self.master_key_map = {key: value for key, value in self.master_key_map.items() if value[0] > 1 }  # if packet total_occu,pii_occur = >1 , >1 then only consider 
         return self.master_key_map
 
-    def process_files(self,json_file):
+    def process_files(self):
         """
         Processes the JSON files in the specified directory.
 
         Returns:
         - master_key_map (dict): The final master key map.
         """
-        with open(json_file, 'r') as data_file:
-            self.packetz = json.loads(data_file.read())
-        self.register_keys(self.packetz)
+        json_files = self.json_files
+        for json_file in json_files:
+            print("processing..."+json_file)
+            with open(json_file, 'r') as data_file:
+                self.packetz = json.loads(data_file.read())
+            self.register_keys(self.packetz)
         self.filter_keys(0.65)
         for i in self.master_key_map:
             self.list_of_keys.append(i)
         return self.master_key_map
 
+    def find_json_files(self, directory):
+        """
+        Finds all the JSON files in the specified directory.
+
+        Args:
+        - directory (str): The directory path.
+
+        Returns:
+        - json_files (list): The list of JSON file paths.
+        """
+        json_files = []
+        for file in glob.glob(os.path.join(directory, '**/*.json'), recursive=True):
+            json_files.append(file)
+        return json_files
 
     def make_binary_input(self):
         """

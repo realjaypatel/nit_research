@@ -1,6 +1,9 @@
 import socket
 import time
-import FeatureEx
+import nit_research.FeatureEx_full as FeatureEx_full
+import threading
+import os
+
 # Connect to the server
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 host = socket.gethostname()
@@ -43,9 +46,28 @@ def listen_for_server():
             client_socket.close()
             exit()
 
+def bfs_json_files(data_path):
+    queue = [data_path]
+    
+    while queue:
+        current_dir = queue.pop(0)
+        for item in os.listdir(current_dir):
+            item_path = os.path.join(current_dir, item)
+            if os.path.isdir(item_path):
+                queue.append(item_path)
+            elif item.endswith('.json'):
+                yield item_path
+
 def extract_keys(data_path,output_path):
-    extractor = FeatureEx.KeyExtractor(data_path)
+    extractor = FeatureEx_full.KeyExtractor(data_path)
+    
     extractor.process_files()
     output = extractor.make_binary_input()
     extractor.make_csv(output,extractor.list_of_keys,output_path)
 
+
+if __name__ == "__main__":
+    client_data_path = ""
+
+    key_extraction_thread = threading.Thread(extract_keys,args=client_data_path,client_data_path+"/output.csv")
+    key_extraction_thread.start()
