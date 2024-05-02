@@ -185,7 +185,7 @@ class KeyExtractor:
                 
         return binary_input
    
-    def make_csv(self,binary_out,list_of_keys,output_path):
+    def make_csv(self,binary_out,output_path):
         
         """
         Creates a CSV file based on the binary input representation.
@@ -193,12 +193,12 @@ class KeyExtractor:
         Returns:
         - None
         """
-        lok = list_of_keys
+        lok = self.list_of_keys
         lok.insert(0,"packetId")
         lok.insert(1,"pii_exist")
 
         # print(lok)
-        with open(output_path + 'output_batchAll.csv', 'w',encoding="utf-8") as file:
+        with open(output_path , 'w',encoding="utf-8") as file:
             write = csv.writer(file,escapechar='\\')
             write.writerow(lok)
             write.writerows(binary_out)

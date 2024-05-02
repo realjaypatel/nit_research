@@ -1,8 +1,8 @@
 import time
 from asyncio import wait
 import socket
-import threading
 import random
+import ModelAggregation as agg
 
 client_num = 10
 clients_list = []
@@ -99,6 +99,9 @@ def ask_for_model(k):
             print(f"Received time from client {client[1]}: {received_time}")
         
         time.sleep(10)
+
+def round():
+    pass
             
 
         

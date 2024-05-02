@@ -1,8 +1,9 @@
 import socket
-import time
 import FeatureEx as FeatureEx
-import threading
+import ModelTraining as train
 import os
+import pickle
+
 
 # Connect to the server
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -18,6 +19,14 @@ def send_message(message):
         print("Error sending message. Closing the connection.")
         client_socket.close()
 
+# Function to send a data structure to the server
+def send_data_structure(data):
+    try:
+        client_socket.send(pickle.dumps(data))
+    except (BrokenPipeError, OSError):
+        print("Error sending data structure. Closing the connection.")
+        client_socket.close()
+
 # Function to receive a message from the server
 def receive_message():
     try:
@@ -25,6 +34,15 @@ def receive_message():
         return data.decode()
     except (ConnectionResetError, OSError):
         print("Error receiving message. Closing the connection.")
+        client_socket.close()
+
+# Function to receive a data structure from the server
+def receive_data_structure():
+    try:
+        data = client_socket.recv(1024)
+        return pickle.loads(data)
+    except (ConnectionResetError, OSError):
+        print("Error receiving data structure. Closing the connection.")
         client_socket.close()
 
 def report_new_key(key):
@@ -58,7 +76,7 @@ def bfs_json_files(data_path):
             elif item.endswith('.json'):
                 yield item_path
 
-def extract_keys(data_path,output_path):
+def extract_keys(data_path,output_file):
     extractor = FeatureEx.KeyExtractor(data_path)
     
     extractor.process_files()
@@ -67,15 +85,22 @@ def extract_keys(data_path,output_path):
     send_message(extractor.list_of_keys)
     send_message("global key request")
     extractor.list_of_keys = list(dict.fromkeys(receive_message().split()))
-    extractor.make_csv(extractor.make_binary_input(),extractor.list_of_keys,output_path)
+    extractor.make_csv(extractor.make_binary_input(),extractor.list_of_keys,output_file)
     return extractor
 
-def round():
-    
+def round(output_file):
+    # data_prc = train.data_preprocessor(output_path)
+    # data_prc.preprocess()
+    trainer = train.ModelTrainer(epsilon=1000, delta=1e-2, data_file=output_file)
+    trainer.test_size=0.2
+    trainer.random_state=42
+    trainer.preprocess()
+    trainer.federated_learning(trainer.X_train, trainer.y_train_one_hot, trainer.X_test, trainer.y_test)
 
 
 
 if __name__ == "__main__":
     client_data_path = ""
-    extractor = extract_keys(client_data_path,client_data_path)
+    outFile = client_data_path + "output.csv"
+    extractor = extract_keys(client_data_path,outFile)
     client_socket.connect((host, port))
