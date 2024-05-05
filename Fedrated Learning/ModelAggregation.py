@@ -3,7 +3,7 @@ import tensorflow as tf
 
 
 class ModelTrainer:
-    def __init__(self, epsilon, delta, data_file):
+    def __init__(self):
         self.model = tf.keras.Sequential([
             tf.keras.layers.Dense(self.num_classes, activation='softmax')
         ])

@@ -1,11 +1,13 @@
 import time
+import pickle
 from asyncio import wait
 import socket
 import random
 import ModelAggregation as agg
 
-client_num = 10
+client_num = 1
 clients_list = []
+client_models = []
 global_key_list = set()
 k=len(clients_list)*2//3
 
@@ -19,11 +21,15 @@ def server_connection_loop(server_socket):
         print(f'Connected to {addr}')
         clients_list.append((client_socket,addr))
         send_message(client_socket,"key list request")
-        client_keys=receive_message(client_socket)
+        while receive_message(client_socket) != "ready to send keys list":
+            pass
+        send_message("ready to receive keys list")
+        client_keys=receive_data_structure(client_socket)
         for i in client_keys:
             global_key_list.add(i)
 
-    broadcast_message(str(dict.fromkeys(global_key_list)),server_socket)
+    broadcast_message("broadcasting global key list",server_socket)
+    broadcast_data_structure(list(global_key_list),server_socket)
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 host = socket.gethostname()
@@ -45,6 +51,15 @@ def send_message(client_socket, message):
         print("Error sending message. Closing the connection.")
         client_socket.close()
 
+# Function to send a data structure to the server
+def send_data_structure(client_socket,data):
+    try:
+        client_socket.send(pickle.dumps(data))
+    except (BrokenPipeError, OSError):
+        print("Error sending data structure. Closing the connection.")
+        client_socket.close()
+
+
 # Function to receive a message from a client
 def receive_message(client_socket):
     try:
@@ -53,7 +68,16 @@ def receive_message(client_socket):
     except (ConnectionResetError, OSError):
         print("Error receiving message. Closing the connection.")
         client_socket.close()
-    
+
+# Function to receive a data structure from the server
+def receive_data_structure(client_socket):
+    try:
+        data = client_socket.recv(1024)
+        return pickle.loads(data)
+    except (ConnectionResetError, OSError):
+        print("Error receiving data structure. Closing the connection.")
+        client_socket.close()
+
 def broadcast_message(message,sender):
     for client in clients_list:
         if client is sender:
@@ -61,6 +85,12 @@ def broadcast_message(message,sender):
         else:
             send_message(client[0], message)
 
+def broadcast_data_structure(data_structure, sender):
+    for client in clients_list:
+        if client is sender:
+            pass
+        else:
+            send_data_structure(client[0], data_structure)
 
 ##################################################################
 # functions used in threads
@@ -74,14 +104,14 @@ def clean_clients_list():
                 k=len(clients_list)*2//3
         time.sleep(1)  # Check every 1 seconds
 
-def listen_for_new_keys():
-    while True:
-        for client in clients_list:
-            message = receive_message(client)
-            if message is "new_key":
-                send_message("send_key")
-                key = receive_message(client)
-                global_key_list.append(key)
+# def listen_for_new_keys():
+#     while True:
+#         for client in clients_list:
+#             message = receive_message(client)
+#             if message is "new_key":
+#                 send_message("send_key")
+#                 key = receive_message(client)
+#                 global_key_list.append(key)
 
             
 
@@ -100,9 +130,14 @@ def ask_for_model(k):
         
         time.sleep(10)
 
-def round():
-    pass
-            
+def round(sel_client):
+    broadcast_message("Request for model")
+    for i in sel_client:
+        send_message(i,"ready to receive model")
+        client_models[i] = receive_data_structure(i)
+    aggragator = agg.ModelTrainer()
+    print(client_models)
+    # aggragator.global_aggregator(client_models)
 
         
 

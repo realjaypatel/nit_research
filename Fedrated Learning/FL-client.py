@@ -65,6 +65,10 @@ def listen_for_server():
             exit()
 
 def bfs_json_files(data_path):
+    """
+    This function performs a breadth-first search on the directory tree starting from the given data path.
+    It yields the path of each JSON file found in the directory tree.
+    """
     queue = [data_path]
     
     while queue:
@@ -77,14 +81,20 @@ def bfs_json_files(data_path):
                 yield item_path
 
 def extract_keys(data_path,output_file):
-    extractor = FeatureEx.KeyExtractor(data_path)
+    extractor = FeatureEx.KeyExtractor()
     
-    extractor.process_files()
-    while not (receive_message() == "key list request"):
+    for json_file in bfs_json_files(data_path):
+        extractor.process_files(json_file)
+    while receive_message() != "key list request":
+        pass
+    send_message("ready to send keys list")
+    while receive_message() != "ready to receive keys list":
         pass
     send_message(extractor.list_of_keys)
-    send_message("global key request")
-    extractor.list_of_keys = list(dict.fromkeys(receive_message().split()))
+
+    while receive_message()!= "broadcasting global key list":
+        pass
+    extractor.list_of_keys = receive_data_structure()
     extractor.make_csv(extractor.make_binary_input(),extractor.list_of_keys,output_file)
     return extractor
 
@@ -100,7 +110,8 @@ def round(output_file):
 
 
 if __name__ == "__main__":
-    client_data_path = ""
+    client_data_path = "nit_research/data/antshield_public_dataset/raw_data/auto_anteater/batch1"
     outFile = client_data_path + "output.csv"
     extractor = extract_keys(client_data_path,outFile)
     client_socket.connect((host, port))
+    

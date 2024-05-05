@@ -4,7 +4,7 @@ import json
 import csv
 
 class KeyExtractor:
-    def __init__(self, data_path):
+    def __init__(self):
         """
         Initializes the KeyExtractor object.
 
@@ -51,7 +51,7 @@ class KeyExtractor:
         
         temp = []
         for x in keys:
-            if x.lower() in self.skip:
+            if x.lower() in self.skip or x == '':
                 # print(x)
                 continue
             temp.append(x)
@@ -94,19 +94,6 @@ class KeyExtractor:
             key_list = self.list_keys(packetz[packet])
             if isinstance(self.packetz[packet]["pii_types"], list):
                 self.packet_key_dict[packet] = [1,key_list]
-                # ad = False
-                # pii = False
-                # for x in self.packetz[packet]["pii_types"]:
-                #     if x in self.pii:
-                #         pii = True
-                #     if x in self.adv:
-                #         ad = True
-                # if pii and ad:
-                #     self.packet_key_dict[packet] = [3,key_list]
-                # elif ad:
-                #     self.packet_key_dict[packet] = [2,key_list]
-                # else:
-                #     self.packet_key_dict[packet] = [1,key_list]
             else:
                 self.packet_key_dict[packet] = [0,key_list]
                 
@@ -142,10 +129,10 @@ class KeyExtractor:
         Returns:
         - master_key_map (dict): The final master key map.
         """
+        print("processing"+json_file)
         with open(json_file, 'r') as data_file:
             self.packetz = json.loads(data_file.read())
         self.register_keys(self.packetz)
-        self.filter_keys(0.65)
         for i in self.master_key_map:
             self.list_of_keys.append(i)
         return self.master_key_map
@@ -182,7 +169,7 @@ class KeyExtractor:
             # binary_input[packet_no].extend(pii_exist)
             packet_no += 1
             # print(binary_input[packet_no])'
-                
+        print("total packets : " + str(packet_no))        
         return binary_input
    
     def make_csv(self,binary_out,output_path):
@@ -208,24 +195,32 @@ class KeyExtractor:
 # Specify the directory you want to start from
 # rootDir = ""
 # data_Dir = rootDir + "combined data"
-# # data_Dir = rootDir + "antshield_public_dataset/1packettest.json"
+# data_file1 = "nit_research/data/antshield_public_dataset/raw_data/auto_anteater/batch1/HTTP/com.abtnprojects.ambatana.json"
+# data_file2 = "nit_research/data/antshield_public_dataset/raw_data/auto_anteater/batch1/HTTP/com.walmart.android.json"
+
+# data_Dir = rootDir + "antshield_public_dataset/1packettest.json"
 # log_path = rootDir + "output/log.txt"
-# out_path = rootDir + "output/"
+# out_path = "nit_research/output/outtest.csv"
     
 # rootDir = ""
 # data_Dir = rootDir + "data/antshield_public_dataset/raw_data/auto_anteater/"
 # log_path = rootDir + "output/log.txt"
 # out_path = rootDir + "output/"
 
-# key_extractor = KeyExtractor(data_Dir)
-# key_extractor.process_files()
+# key_extractor = KeyExtractor(data_file1)
+# key_extractor.process_files(data_file1)
+# key_extractor = KeyExtractor(data_file2)
+# key_extractor.process_files(data_file2)
+
+
 # print("finised processing")
 
 
 # binary_input = key_extractor.make_binary_input()
-# # print("_.>>",binary_input)
-# # print('------------------------------------------')
-# key_extractor.make_csv(binary_input,key_extractor.list_of_keys,out_path)
+# print("_.>>",binary_input)
+# print('------------------------------------------')
+# key_extractor.make_csv(binary_input,out_path)
+
 
 
 
