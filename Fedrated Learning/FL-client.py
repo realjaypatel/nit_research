@@ -110,6 +110,9 @@ def round(output_file):
     trainer.random_state=42
     trainer.preprocess()
     trainer.federated_learning(trainer.X_train, trainer.y_train_one_hot, trainer.X_test, trainer.y_test)
+    while receive_message() != "Request for model":
+        pass
+    send_data_structure(client_socket,trainer.model)
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
@@ -136,4 +139,4 @@ if __name__ == "__main__":
     print(client_data_path[-7:],"Local keySet : " , local_keys ,"Global keySet : ",len(extractor.list_of_keys))
     extractor.make_csv(extractor.make_binary_input(),outFile)
     
-    
+

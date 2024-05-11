@@ -163,4 +163,4 @@ def round(sel_client):
 
 if __name__ == "__main__":
     server_connection_loop(server_socket)
-    # round(clients_list)
+    round(clients_list)
