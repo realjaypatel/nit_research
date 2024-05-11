@@ -2,6 +2,8 @@ import socket
 import FeatureEx as FeatureEx
 import ModelTraining as train
 import os
+import json
+import sys
 import pickle
 
 
@@ -14,32 +16,45 @@ port = 64852
 # Function to send a message to the server
 def send_message(message):
     try:
-        client_socket.send(message.encode())
+        client_socket.send(message.encode('utf-8'))
     except (BrokenPipeError, OSError):
         print("Error sending message. Closing the connection.")
-        client_socket.close()
-
-# Function to send a data structure to the server
-def send_data_structure(data):
-    try:
-        client_socket.send(pickle.dumps(data))
-    except (BrokenPipeError, OSError):
-        print("Error sending data structure. Closing the connection.")
         client_socket.close()
 
 # Function to receive a message from the server
 def receive_message():
     try:
         data = client_socket.recv(1024)
-        return data.decode()
+        print(data)
+        return data.decode('utf-8')
     except (ConnectionResetError, OSError):
         print("Error receiving message. Closing the connection.")
+        client_socket.close()
+
+
+# Function to send a data structure to the server
+def send_data_structure(client_socket, data):
+    try:
+        payload = pickle.dumps(data)
+        data_size = len(payload)
+        size_header = data_size.to_bytes(4, byteorder='big')  # Use a 4-byte header for size
+        client_socket.send(size_header)
+        client_socket.send(payload)
+    except (BrokenPipeError, OSError):
+        print("Error sending data structure. Closing the connection.")
         client_socket.close()
 
 # Function to receive a data structure from the server
 def receive_data_structure():
     try:
-        data = client_socket.recv(1024)
+        size_header = client_socket.recv(4)  # Receive the size header
+        data_size = int.from_bytes(size_header, byteorder='big')  # Convert the size header to integer
+        data = b''
+        while len(data) < data_size:
+            packet = client_socket.recv(data_size - len(data))
+            if not packet:
+                return None
+            data += packet
         return pickle.loads(data)
     except (ConnectionResetError, OSError):
         print("Error receiving data structure. Closing the connection.")
@@ -85,17 +100,6 @@ def extract_keys(data_path,output_file):
     
     for json_file in bfs_json_files(data_path):
         extractor.process_files(json_file)
-    while receive_message() != "key list request":
-        pass
-    send_message("ready to send keys list")
-    while receive_message() != "ready to receive keys list":
-        pass
-    send_message(extractor.list_of_keys)
-
-    while receive_message()!= "broadcasting global key list":
-        pass
-    extractor.list_of_keys = receive_data_structure()
-    extractor.make_csv(extractor.make_binary_input(),extractor.list_of_keys,output_file)
     return extractor
 
 def round(output_file):
@@ -107,11 +111,29 @@ def round(output_file):
     trainer.preprocess()
     trainer.federated_learning(trainer.X_train, trainer.y_train_one_hot, trainer.X_test, trainer.y_test)
 
-
-
 if __name__ == "__main__":
-    client_data_path = "nit_research/data/antshield_public_dataset/raw_data/auto_anteater/batch1"
-    outFile = client_data_path + "output.csv"
+    if len(sys.argv) != 3:
+        print("Usage: python FL-client.py <client_data_path> <output_file>")
+        sys.exit(1)
+    client_data_path = sys.argv[1]
+    outFile = sys.argv[2]
+
     extractor = extract_keys(client_data_path,outFile)
     client_socket.connect((host, port))
+    print(f"Connected to the server")
+    while receive_message() != "key list request":
+        pass
+    send_message("ready to send keys list")
+    while receive_message() != "ready to receive keys list":
+        pass
+    send_data_structure(client_socket,extractor.list_of_keys)
+    local_keys = len(extractor.list_of_keys)
+    while receive_message() != "received keys list successfully":
+        pass
+    while receive_message()!= "broadcasting global key list":
+        pass
+    extractor.list_of_keys = receive_data_structure()
+    print(client_data_path[-7:],"Local keySet : " , local_keys ,"Global keySet : ",len(extractor.list_of_keys))
+    extractor.make_csv(extractor.make_binary_input(),outFile)
+    
     
