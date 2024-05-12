@@ -32,14 +32,16 @@ class ModelTrainer:
         self.num_classes = len(np.unique(data_preprocessor.y))    
         self.epsilon = epsilon
         self.delta = delta
+        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
+            self.data_preprocessor.X, self.data_preprocessor.y, train_size=self.test_size, random_state=self.random_state
+            )
         self.model = tf.keras.Sequential([
             tf.keras.layers.Dense(self.num_classes, activation='softmax')
         ])
         self.global_model = tf.keras.models.clone_model(self.model)
 
     def preprocess(self):
-        self.X_train, self.X_test, self.y_train, self.y_test = X_train, X_test, y_train, y_test = train_test_split(self.data_preprocessor.X, self.data_preprocessor.y, self.test_size, self.random_state)
-        self.y_train_one_hot = y_train_one_hot = tf.one_hot(y_train, depth=self.num_classes).numpy()
+        self.y_train_one_hot = y_train_one_hot = tf.one_hot(self.y_train, depth=self.num_classes).numpy()
 
     def train_on_client_dp(self, X, y):
         delta_prime = self.delta / (2 * len(X) / 32)  # Assuming batch size of 32

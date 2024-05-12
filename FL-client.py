@@ -109,7 +109,7 @@ def round(output_file):
     trainer.test_size=0.2
     trainer.random_state=42
     trainer.preprocess()
-    trainer.train_on_client_dp(data_prc.X_train,data_prc.y_train)
+    trainer.train_on_client_dp(trainer.X_train,trainer.y_train)
     while receive_message() != "Request for model":
         pass
     send_message("ready to send model")
