@@ -103,14 +103,17 @@ def extract_keys(data_path,output_file):
     return extractor
 
 def round(output_file):
-    # data_prc = train.data_preprocessor(output_path)
-    # data_prc.preprocess()
-    trainer = train.ModelTrainer(epsilon=1000, delta=1e-2, data_file=output_file)
+    data_prc = train.DataPreprocessor(output_file)
+    data_prc.preprocess()
+    trainer = train.ModelTrainer(epsilon=1000, delta=1e-2, data_preprocessor=data_prc)
     trainer.test_size=0.2
     trainer.random_state=42
     trainer.preprocess()
-    trainer.federated_learning(trainer.X_train, trainer.y_train_one_hot, trainer.X_test, trainer.y_test)
+    trainer.train_on_client_dp(data_prc.X_train,data_prc.y_train)
     while receive_message() != "Request for model":
+        pass
+    send_message("ready to send model")
+    while receive_message() != "ready to receive model":
         pass
     send_data_structure(client_socket,trainer.model)
 
@@ -138,5 +141,5 @@ if __name__ == "__main__":
     extractor.list_of_keys = receive_data_structure()
     print(client_data_path[-7:],"Local keySet : " , local_keys ,"Global keySet : ",len(extractor.list_of_keys))
     extractor.make_csv(extractor.make_binary_input(),outFile)
-    
 
+    round(outFile)

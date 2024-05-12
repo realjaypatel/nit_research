@@ -25,28 +25,6 @@ print("Listening for connection!!")
 
 
 
-def server_connection_loop(server_socket):
-    while len(clients_list) < client_num:
-        print("Waiting for connection!!")
-        client_socket, addr = server_socket.accept()
-        print(f'Connected to {addr}')
-        clients_list.append((client_socket, addr))
-        send_message(client_socket, "key list request")
-        while receive_message(client_socket) != "ready to send keys list":
-            pass
-        send_message(client_socket, "ready to receive keys list")
-        client_keys = receive_data_structure(client_socket)
-        send_message(client_socket, "received keys list successfully")
-        for i in client_keys:
-            global_key_list.add(i)
-
-    broadcast_message("broadcasting global key list", server_socket)
-    broadcast_data_structure(list(global_key_list), server_socket)
-
-
-
-
-
 ##################################################################
 # functions for communication send receive and broadcast
 ##################################################################
@@ -150,17 +128,37 @@ def clean_clients_list():
 #         time.sleep(10)
 
 def round(sel_client):
-    broadcast_message("Request for model",server_socket)
+    broadcast_message("Request for model",None)
     for i in range(len(sel_client)):
-        print(i,sel_client[i][0])
-        send_message(sel_client[i][0], "ready to receive model")
-        client_models[i] = receive_data_structure(sel_client[i][0])
+        i_socket = sel_client[i][0]
+        print(i,i_socket,receive_message(i_socket))
+        while receive_message(i_socket) != "ready to send model":
+            print("Waiting for client to be ready to send model.")
+            pass
+        send_message(i_socket, "ready to receive model")
+        client_models[i] = receive_data_structure(i_socket)
     aggragator = agg.ModelTrainer()
-    print(client_models)
     aggragator.global_aggregator(client_models)
-
         
-
 if __name__ == "__main__":
-    server_connection_loop(server_socket)
+    # Server connection loop
+    while len(clients_list) < client_num:
+        print("Waiting for connection!!")
+        client_socket, addr = server_socket.accept()
+        print(f'Connected to {addr}')
+        clients_list.append((client_socket, addr))
+        send_message(client_socket, "key list request")
+        while receive_message(client_socket) != "ready to send keys list":
+            pass
+        send_message(client_socket, "ready to receive keys list")
+        client_keys = receive_data_structure(client_socket)
+        send_message(client_socket, "received keys list successfully")
+        for i in client_keys:
+            global_key_list.add(i)
+
+    broadcast_message("broadcasting global key list", server_socket)
+    broadcast_data_structure(list(global_key_list), server_socket)
+
+    # broadcast_message("Request for model 0",None)
+    
     round(clients_list)

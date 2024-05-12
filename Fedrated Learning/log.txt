@@ -1,18 +1,3 @@
-2024-05-11 18:27:30.095016: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+2024-05-12 06:49:19.945158: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
 To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
-2024-05-11 18:27:30.767639: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
-processing/home/kavi/Code/PacketMasti/nit_research/data/antshield_public_dataset/raw_data/auto_anteater/batch1/HTTP/com.instagram.android.json
-processing/home/kavi/Code/PacketMasti/nit_research/data/antshield_public_dataset/raw_data/auto_anteater/batch1/HTTP/com.spotify.music.json
-processing/home/kavi/Code/PacketMasti/nit_research/data/antshield_public_dataset/raw_data/auto_anteater/batch1/HTTP/com.pandora.android.json
-processing/home/kavi/Code/PacketMasti/nit_research/data/antshield_public_dataset/raw_data/auto_anteater/batch1/HTTP/No mapping_ entry not found.json
-processing/home/kavi/Code/PacketMasti/nit_research/data/antshield_public_dataset/raw_data/auto_anteater/batch1/HTTP/com.walmart.android.json
-processing/home/kavi/Code/PacketMasti/nit_research/data/antshield_public_dataset/raw_data/auto_anteater/batch1/HTTP/System.json
-processing/home/kavi/Code/PacketMasti/nit_research/data/antshield_public_dataset/raw_data/auto_anteater/batch1/HTTP/com.abtnprojects.ambatana.json
-processing/home/kavi/Code/PacketMasti/nit_research/data/antshield_public_dataset/raw_data/auto_anteater/batch1/HTTP/com.zhiliaoapp.musically.json
-processing/home/kavi/Code/PacketMasti/nit_research/data/antshield_public_dataset/raw_data/auto_anteater/batch1/HTTP/com.soundcloud.android.json
-processing/home/kavi/Code/PacketMasti/nit_research/data/antshield_public_dataset/raw_data/auto_anteater/batch1/HTTP/com.pinterest.json
-processing/home/kavi/Code/PacketMasti/nit_research/data/antshield_public_dataset/raw_data/auto_anteater/batch1/HTTP/com.clearchannel.iheartradio.controller.json
-Traceback (most recent call last):
-  File "/home/kavi/Code/PacketMasti/nit_research/Fedrated Learning/./FL-client.py", line 121, in <module>
-    client_socket.connect((host, port))
-ConnectionRefusedError: [Errno 111] Connection refused
+2024-05-12 06:49:20.655664: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
